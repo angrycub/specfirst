@@ -1,0 +1,11 @@
+.docs/api/openapi.yaml
+.openapi-generator-ignore
+Dockerfile
+README.md
+go.mod
+handlers/api_variable_operations.go
+handlers/container.go
+main.go
+models/hello-world.go
+models/model_secure_variable.go
+models/model_secure_variable_stub.go

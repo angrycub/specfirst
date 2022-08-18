@@ -1,0 +1,442 @@
+# Code generated from hashicorp/nomad-openapi/generator; DO NOT EDIT.
+components:
+  parameters:
+    AllParam:
+      description: Flag indicating whether to constrain by create index or not.
+      in: query
+      name: all
+      schema:
+        type: integer
+    IdempotencyTokenParam:
+      description: Can be used to ensure operations are only run once.
+      in: query
+      name: idempotency_token
+      schema:
+        type: string
+    IndexParam:
+      description: If set, wait until query exceeds given index. Must be provided
+        with WaitParam.
+      in: query
+      name: index
+      schema:
+        type: integer
+    VariableBagName:
+      description: The namespace identifier.
+      in: path
+      name: pathToBag
+      required: true
+      schema:
+        type: string
+    NamespaceParam:
+      description: Filters results based on the specified namespace.
+      in: query
+      name: namespace
+      schema:
+        type: string
+    NextTokenParam:
+      description: Indicates where to start paging for queries that support pagination.
+      in: query
+      name: next_token
+      schema:
+        type: string
+    NomadTokenHeader:
+      description: A Nomad ACL token.
+      in: header
+      name: X-Nomad-Token
+      schema:
+        type: string
+    PerPageParam:
+      description: Maximum number of results to return.
+      in: query
+      name: per_page
+      schema:
+        type: integer
+    PrefixParam:
+      description: Constrains results to jobs that start with the defined prefix
+      in: query
+      name: prefix
+      schema:
+        type: string
+    RegionParam:
+      description: Filters results based on the specified region.
+      in: query
+      name: region
+      schema:
+        type: string
+    StaleParam:
+      description: If present, results will include stale reads.
+      in: query
+      name: stale
+      schema:
+        type: string
+    WaitParam:
+      description: Provided with IndexParam to wait for change.
+      in: query
+      name: wait
+      schema:
+        type: string
+  requestBodies:
+    SecureVariable:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecureVariable'
+      required: true
+  responses:
+    BadRequestResponse:
+      description: Bad request
+    CreateVariableResponse:
+      description: ""
+      headers:
+        X-Nomad-Index:
+          $ref:  '#/components/headers/X-Nomad-Index'
+    DeleteVariableResponse:
+      description: ""
+      headers:
+        X-Nomad-Index:
+          $ref:  '#/components/headers/X-Nomad-Index'
+    ForbiddenResponse:
+      description: Forbidden
+    GetVariableResponse:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecureVariable'
+      description: ""
+      headers:
+        X-Nomad-Index:
+          $ref:  '#/components/headers/X-Nomad-Index'
+        X-Nomad-KnownLeader:
+          $ref:  '#/components/headers/X-Nomad-KnownLeader'
+        X-Nomad-LastContact:
+          $ref:  '#/components/headers/X-Nomad-LastContact'
+
+    GetSecureVariablesResponse:
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: '#/components/schemas/SecureVariable'
+            type: array
+      description: ""
+      headers:
+        X-Nomad-Index:
+          $ref:  '#/components/headers/X-Nomad-Index'
+        X-Nomad-KnownLeader:
+          $ref:  '#/components/headers/X-Nomad-KnownLeader'
+        X-Nomad-LastContact:
+          $ref:  '#/components/headers/X-Nomad-LastContact'
+
+    InternalServerErrorResponse:
+      description: Internal server error
+
+    MethodNotAllowedResponse:
+      description: Method not allowed
+
+    PostVariableResponse:
+      description: ""
+      headers:
+        X-Nomad-Index:
+          $ref:  '#/components/headers/X-Nomad-Index'
+  headers:
+    X-Nomad-Index:
+      description: A unique identifier representing the current state of the requested resource. On a new Nomad cluster the value of this index starts at 1.
+      schema:
+        type: integer 
+    X-Nomad-LastContact:
+      description: The time in milliseconds that a server was last contacted by
+        the leader node.
+      schema:
+         $ref: '#/components/schemas/Duration'
+    X-Nomad-KnownLeader:
+      description: Boolean indicating if there is a known cluster leader.
+      schema:
+        type: boolean
+  schemas:
+    SecureVariable:
+      properties:
+        Namespace:
+          type: string
+          default: "default"
+          readOnly: true
+        Path:
+          type: string
+          example: "path/to/bag"
+          readOnly: true
+        CreateIndex:
+          $ref: '#/components/schemas/RaftIndex'
+        CreateTime:
+          $ref: '#/components/schemas/Timestamp'
+        ModifyIndex:
+          $ref: '#/components/schemas/RaftIndex'
+        ModifyTime:
+          $ref: '#/components/schemas/Timestamp'         
+        Items:
+          additionalProperties:
+            type: string
+            uniqueItems: true
+          example:
+            db_password: secret
+            admin_password: supersecret
+            user_password: abcd123
+          type: object
+        Meta:
+          additionalProperties:
+            type: string
+            uniqueItems: true
+          example:
+            created_by: alice@acme.com
+            mission_critical: false
+          type: object
+        Version:
+          type: integer
+          readOnly: true
+      type: object
+    RaftIndex:
+      format: int64
+      type: integer
+      readOnly: true
+    Duration:
+      format: int64
+      type: integer
+    Timestamp:
+      format: date-time
+      type: string
+      readOnly: true
+  securitySchemes:
+    X-Nomad-Token:
+      in: header
+      name: X-Nomad-Token
+      type: apiKey
+info:
+  contact:
+    email: support@hashicorp.com
+  license:
+    name: MPL 2
+    url: https://github.com/hashicorp/nomad/blob/main/LICENSE
+  title: Nomad Secure Variables
+  version: 1.4.0
+openapi: 3.0.3
+paths:
+  /var/{pathToBag}:
+    get:
+      operationId: GetSecureVariable
+      summary: Fetch a secure variables bag
+      parameters:
+      - $ref: '#/components/parameters/VariableBagName'
+      - $ref: '#/components/parameters/RegionParam'
+      - $ref: '#/components/parameters/NamespaceParam'
+      - $ref: '#/components/parameters/IndexParam'
+      - $ref: '#/components/parameters/WaitParam'
+      - $ref: '#/components/parameters/StaleParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/GetVariableResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "403":
+          $ref: '#/components/responses/ForbiddenResponse'
+        "405":
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        "500":
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+      - X-Nomad-Token: []
+      tags:
+      - "Variable Operations"
+    put:
+      operationId: CreateSecureVariable
+      summary: Store a secure variable bag
+      parameters:
+      - $ref: '#/components/parameters/VariableBagName'
+      - $ref: '#/components/parameters/RegionParam'
+      - $ref: '#/components/parameters/NamespaceParam'
+      - $ref: '#/components/parameters/IdempotencyTokenParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecureVariable'
+        required: true
+      responses:
+        "200":
+          $ref: '#/components/responses/CreateVariableResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "403":
+          $ref: '#/components/responses/ForbiddenResponse'
+        "405":
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        "500":
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+      - X-Nomad-Token: []
+      tags:
+      - "Variable Operations"
+    delete:
+      operationId: DeleteSecureVariable
+      summary: Delete a secure variable bag
+      parameters:
+      - $ref: '#/components/parameters/VariableBagName'
+      - $ref: '#/components/parameters/RegionParam'
+      - $ref: '#/components/parameters/NamespaceParam'
+      - $ref: '#/components/parameters/IdempotencyTokenParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/DeleteVariableResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "403":
+          $ref: '#/components/responses/ForbiddenResponse'
+        "405":
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        "500":
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+      - X-Nomad-Token: []
+      tags:
+      - "Variable Operations"
+
+    post:
+      operationId: PostSecureVariable
+      summary: Write a secure variable bag
+      parameters:
+      - $ref: '#/components/parameters/VariableBagName'
+      - $ref: '#/components/parameters/RegionParam'
+      - $ref: '#/components/parameters/NamespaceParam'
+      - $ref: '#/components/parameters/IdempotencyTokenParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecureVariable'
+        required: true
+      responses:
+        "200":
+          $ref: '#/components/responses/PostVariableResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "403":
+          $ref: '#/components/responses/ForbiddenResponse'
+        "405":
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        "500":
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+      - X-Nomad-Token: []
+      tags:
+      - "Variable Operations"
+  /vars:
+    get:
+      operationId: ListVars
+      summary: List the variable bags
+      parameters:
+      - $ref: '#/components/parameters/RegionParam'
+      - $ref: '#/components/parameters/NamespaceParam'
+      - $ref: '#/components/parameters/IndexParam'
+      - $ref: '#/components/parameters/WaitParam'
+      - $ref: '#/components/parameters/StaleParam'
+      - $ref: '#/components/parameters/PrefixParam'
+      - $ref: '#/components/parameters/PerPageParam'
+      - $ref: '#/components/parameters/NextTokenParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/GetSecureVariablesResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "403":
+          $ref: '#/components/responses/ForbiddenResponse'
+        "405":
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        "500":
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+      - X-Nomad-Token: []
+      tags:
+      - "Variable Operations"
+  /system/vars/rekey:
+    get:
+      summary: "View progress for secure variables rekey"
+      operationId: GetSecureVariablesRekeyStatus
+      responses:
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "403":
+          $ref: '#/components/responses/ForbiddenResponse'
+        "405":
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        "500":
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+      - X-Nomad-Token: []
+      tags:
+      - "Secure Variables Configuration"
+    put:
+      summary: "Rekey all secrets in secure variables"
+      operationId: StartSecureVariablesRekey
+      responses:
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "403":
+          $ref: '#/components/responses/ForbiddenResponse'
+        "405":
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        "500":
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+      - X-Nomad-Token: []
+      tags:
+      - "Secure Variables Configuration"
+  /system/vars/rotate:
+    get:
+      summary: "Get key rotation progress"
+      operationId: GetSecureVariablesKeyRotateStatus
+      responses:
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "403":
+          $ref: '#/components/responses/ForbiddenResponse'
+        "405":
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        "500":
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+      - X-Nomad-Token: []
+      tags:
+      - "Secure Variables Configuration"
+    put:
+      summary: "Start the key rotation process"
+      operationId: StartSecureVariablesKeyRotation
+      responses:
+        "400":
+          $ref: '#/components/responses/BadRequestResponse'
+        "403":
+          $ref: '#/components/responses/ForbiddenResponse'
+        "405":
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        "500":
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+      - X-Nomad-Token: []
+      tags:
+      - "Secure Variables Configuration"
+  
+security:
+- X-Nomad-Token: []
+servers:
+- description: "Nomad Server"
+  url: '{scheme}://{address}:{port}/v1'
+  variables:
+    address:
+      default: 127.0.0.1
+    port:
+      default: "4646"
+    scheme:
+      default: http
+      enum:
+      - http
+      - https
+tags:
+  - name: "Variable Operations"
+  - name: "Secure Variables Configuration"
+

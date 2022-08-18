@@ -1,0 +1,770 @@
+openapi: 3.0.3
+info:
+  title: Nomad
+  contact:
+    email: support@hashicorp.com
+  license:
+    name: MPL 2
+    url: https://github.com/hashicorp/nomad/blob/main/LICENSE
+  version: 1.1.4
+servers:
+- url: "{scheme}://{address}:{port}/v1"
+  description: agent
+  variables:
+    address:
+      default: "127.0.0.1"
+    port:
+      default: "4646"
+    scheme:
+      enum:
+      - https
+      - http
+      default: http
+security:
+- X-Nomad-Token: []
+paths:
+  /var/{pathToBag}:
+    get:
+      tags:
+      - SecureVariables
+      operationId: GetSecureVariable
+      parameters:
+      - name: region
+        in: query
+        description: Filters results based on the specified region.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: namespace
+        in: query
+        description: Filters results based on the specified namespace.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: index
+        in: query
+        description: "If set, wait until query exceeds given index. Must be provided\
+          \ with WaitParam."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: wait
+        in: query
+        description: Provided with IndexParam to wait for change.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: stale
+        in: query
+        description: "If present, results will include stale reads."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: prefix
+        in: query
+        description: Constrains results to jobs that start with the defined prefix
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: X-Nomad-Token
+        in: header
+        description: A Nomad ACL token.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        description: Maximum number of results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: next_token
+        in: query
+        description: Indicates where to start paging for queries that support pagination.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: pathToBag
+        in: path
+        description: The namespace identifier.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          headers:
+            X-Nomad-Index:
+              description: A unique identifier representing the current state of the
+                requested resource. On a new Nomad cluster the value of this index
+                starts at 1.
+              style: simple
+              explode: false
+              schema:
+                type: integer
+            X-Nomad-KnownLeader:
+              description: Boolean indicating if there is a known cluster leader.
+              style: simple
+              explode: false
+              schema:
+                type: boolean
+            X-Nomad-LastContact:
+              description: The time in milliseconds that a server was last contacted
+                by the leader node.
+              style: simple
+              explode: false
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecureVariable'
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+        "405":
+          description: Method not allowed
+        "500":
+          description: Internal server error
+      security:
+      - X-Nomad-Token: []
+    put:
+      tags:
+      - SecureVariables
+      operationId: CreateSecureVariable
+      parameters:
+      - name: region
+        in: query
+        description: Filters results based on the specified region.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: namespace
+        in: query
+        description: Filters results based on the specified namespace.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: X-Nomad-Token
+        in: header
+        description: A Nomad ACL token.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: idempotency_token
+        in: query
+        description: Can be used to ensure operations are only run once.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: pathToBag
+        in: path
+        description: The namespace identifier.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecureVariable'
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers:
+            X-Nomad-Index:
+              description: A unique identifier representing the current state of the
+                requested resource. On a new Nomad cluster the value of this index
+                starts at 1.
+              style: simple
+              explode: false
+              schema:
+                type: integer
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+        "405":
+          description: Method not allowed
+        "500":
+          description: Internal server error
+      security:
+      - X-Nomad-Token: []
+    post:
+      tags:
+      - SecureVariables
+      operationId: PostSecureVariable
+      parameters:
+      - name: region
+        in: query
+        description: Filters results based on the specified region.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: namespace
+        in: query
+        description: Filters results based on the specified namespace.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: X-Nomad-Token
+        in: header
+        description: A Nomad ACL token.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: idempotency_token
+        in: query
+        description: Can be used to ensure operations are only run once.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: pathToBag
+        in: path
+        description: The namespace identifier.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecureVariable'
+        required: true
+      responses:
+        "200":
+          description: ""
+          headers:
+            X-Nomad-Index:
+              description: A unique identifier representing the current state of the
+                requested resource. On a new Nomad cluster the value of this index
+                starts at 1.
+              style: simple
+              explode: false
+              schema:
+                type: integer
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+        "405":
+          description: Method not allowed
+        "500":
+          description: Internal server error
+      security:
+      - X-Nomad-Token: []
+    delete:
+      tags:
+      - SecureVariables
+      operationId: DeleteSecureVariable
+      parameters:
+      - name: region
+        in: query
+        description: Filters results based on the specified region.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: namespace
+        in: query
+        description: Filters results based on the specified namespace.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: X-Nomad-Token
+        in: header
+        description: A Nomad ACL token.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: idempotency_token
+        in: query
+        description: Can be used to ensure operations are only run once.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: pathToBag
+        in: path
+        description: The namespace identifier.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          headers:
+            X-Nomad-Index:
+              description: A unique identifier representing the current state of the
+                requested resource. On a new Nomad cluster the value of this index
+                starts at 1.
+              style: simple
+              explode: false
+              schema:
+                type: integer
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+        "405":
+          description: Method not allowed
+        "500":
+          description: Internal server error
+      security:
+      - X-Nomad-Token: []
+  /vars:
+    get:
+      tags:
+      - SecureVariables
+      operationId: ListVars
+      parameters:
+      - name: region
+        in: query
+        description: Filters results based on the specified region.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: namespace
+        in: query
+        description: Filters results based on the specified namespace.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: index
+        in: query
+        description: "If set, wait until query exceeds given index. Must be provided\
+          \ with WaitParam."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: wait
+        in: query
+        description: Provided with IndexParam to wait for change.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: stale
+        in: query
+        description: "If present, results will include stale reads."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: prefix
+        in: query
+        description: Constrains results to jobs that start with the defined prefix
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: X-Nomad-Token
+        in: header
+        description: A Nomad ACL token.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        description: Maximum number of results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: next_token
+        in: query
+        description: Indicates where to start paging for queries that support pagination.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          headers:
+            X-Nomad-Index:
+              description: A unique identifier representing the current state of the
+                requested resource. On a new Nomad cluster the value of this index
+                starts at 1.
+              style: simple
+              explode: false
+              schema:
+                type: integer
+            X-Nomad-KnownLeader:
+              description: Boolean indicating if there is a known cluster leader.
+              style: simple
+              explode: false
+              schema:
+                type: boolean
+            X-Nomad-LastContact:
+              description: The time in milliseconds that a server was last contacted
+                by the leader node.
+              style: simple
+              explode: false
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SecureVariable'
+                x-content-type: application/json
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+        "405":
+          description: Method not allowed
+        "500":
+          description: Internal server error
+      security:
+      - X-Nomad-Token: []
+components:
+  schemas:
+    Context:
+      type: string
+    Duration:
+      type: integer
+      format: int64
+    SecureVariable:
+      type: object
+      properties:
+        Namespace:
+          type: string
+          readOnly: true
+          default: default
+        Path:
+          type: string
+          readOnly: true
+          example: path/to/bag
+        CreateIndex:
+          type: integer
+          readOnly: true
+        CreateTime:
+          $ref: '#/components/schemas/DBTime'
+        ModifyIndex:
+          type: integer
+          readOnly: true
+        ModifyTime:
+          $ref: '#/components/schemas/DBTime'
+        items:
+          type: object
+          additionalProperties:
+            uniqueItems: true
+            type: string
+          example:
+            db_password: secret
+            admin_password: supersecret
+            user_password: abcd123
+        meta:
+          type: object
+          additionalProperties:
+            uniqueItems: true
+            type: string
+          example:
+            created_by: alice@acme.com
+            mission_critical: false
+        version:
+          type: integer
+          readOnly: true
+      example:
+        Path: path/to/bag
+        ModifyTime: null
+        CreateIndex: 0
+        meta:
+          created_by: alice@acme.com
+          mission_critical: false
+        CreateTime: 2000-01-23T04:56:07.000+00:00
+        items:
+          db_password: secret
+          admin_password: supersecret
+          user_password: abcd123
+        version: 1
+        Namespace: default
+        ModifyIndex: 6
+    DBTime:
+      type: string
+      format: date-time
+      readOnly: true
+  responses:
+    BadRequestResponse:
+      description: Bad request
+    CreateVariableResponse:
+      description: ""
+      headers:
+        X-Nomad-Index:
+          description: A unique identifier representing the current state of the requested
+            resource. On a new Nomad cluster the value of this index starts at 1.
+          style: simple
+          explode: false
+          schema:
+            type: integer
+    DeleteVariableResponse:
+      description: ""
+      headers:
+        X-Nomad-Index:
+          description: A unique identifier representing the current state of the requested
+            resource. On a new Nomad cluster the value of this index starts at 1.
+          style: simple
+          explode: false
+          schema:
+            type: integer
+    ForbiddenResponse:
+      description: Forbidden
+    GetVariableResponse:
+      description: ""
+      headers:
+        X-Nomad-Index:
+          description: A unique identifier representing the current state of the requested
+            resource. On a new Nomad cluster the value of this index starts at 1.
+          style: simple
+          explode: false
+          schema:
+            type: integer
+        X-Nomad-KnownLeader:
+          description: Boolean indicating if there is a known cluster leader.
+          style: simple
+          explode: false
+          schema:
+            type: boolean
+        X-Nomad-LastContact:
+          description: The time in milliseconds that a server was last contacted by
+            the leader node.
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecureVariable'
+    GetSecureVariablesResponse:
+      description: ""
+      headers:
+        X-Nomad-Index:
+          description: A unique identifier representing the current state of the requested
+            resource. On a new Nomad cluster the value of this index starts at 1.
+          style: simple
+          explode: false
+          schema:
+            type: integer
+        X-Nomad-KnownLeader:
+          description: Boolean indicating if there is a known cluster leader.
+          style: simple
+          explode: false
+          schema:
+            type: boolean
+        X-Nomad-LastContact:
+          description: The time in milliseconds that a server was last contacted by
+            the leader node.
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/SecureVariable'
+            x-content-type: application/json
+    InternalServerErrorResponse:
+      description: Internal server error
+    MethodNotAllowedResponse:
+      description: Method not allowed
+    PostVariableResponse:
+      description: ""
+      headers:
+        X-Nomad-Index:
+          description: A unique identifier representing the current state of the requested
+            resource. On a new Nomad cluster the value of this index starts at 1.
+          style: simple
+          explode: false
+          schema:
+            type: integer
+  parameters:
+    AllParam:
+      name: all
+      in: query
+      description: Flag indicating whether to constrain by job creation index or not.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+    IdempotencyTokenParam:
+      name: idempotency_token
+      in: query
+      description: Can be used to ensure operations are only run once.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+    IndexParam:
+      name: index
+      in: query
+      description: "If set, wait until query exceeds given index. Must be provided\
+        \ with WaitParam."
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+    VariableBagName:
+      name: pathToBag
+      in: path
+      description: The namespace identifier.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    NamespaceParam:
+      name: namespace
+      in: query
+      description: Filters results based on the specified namespace.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+    NextTokenParam:
+      name: next_token
+      in: query
+      description: Indicates where to start paging for queries that support pagination.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+    NomadTokenHeader:
+      name: X-Nomad-Token
+      in: header
+      description: A Nomad ACL token.
+      required: false
+      style: simple
+      explode: false
+      schema:
+        type: string
+    PerPageParam:
+      name: per_page
+      in: query
+      description: Maximum number of results to return.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+    PrefixParam:
+      name: prefix
+      in: query
+      description: Constrains results to jobs that start with the defined prefix
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+    RegionParam:
+      name: region
+      in: query
+      description: Filters results based on the specified region.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+    StaleParam:
+      name: stale
+      in: query
+      description: "If present, results will include stale reads."
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+    WaitParam:
+      name: wait
+      in: query
+      description: Provided with IndexParam to wait for change.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+  requestBodies:
+    SecureVariable:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecureVariable'
+      required: true
+  securitySchemes:
+    X-Nomad-Token:
+      type: apiKey
+      name: X-Nomad-Token
+      in: header

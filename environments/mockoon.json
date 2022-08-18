@@ -1,0 +1,132 @@
+{
+  "uuid": "96059785-9ca0-4f95-bf11-7db03e7ea1ec",
+  "lastMigration": 19,
+  "name": "Mockoon API Proxy",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 5656,
+  "hostname": "0.0.0.0",
+  "routes": [
+    {
+      "uuid": "a4ce91ff-a1e3-4f28-8f0a-bc5a5977147f",
+      "documentation": "Show OpenAPI Runner",
+      "method": "get",
+      "endpoint": "openapi",
+      "responses": [
+        {
+          "uuid": "679e2e52-5998-4e17-9d3a-4303c5a3f44e",
+          "body": "<!doctype html>\n<html>\n<head>\n    <link href=\"https://fonts.googleapis.com/css?family=Nunito\" rel=\"stylesheet\">\n\n<meta charset=\"utf-8\">\n\n<style>\n  rapi-doc{\n    width:100%;\n  }\n</style>\n\n<script type=\"module\" src=\"https://unpkg.com/rapidoc/dist/rapidoc-min.js\"></script>\n<script>\n  function setApiKey(){\n    const docEl = document.getElementById('thedoc');\n    const keyInputEl = document.getElementById('key-val-input');\n    docEl.setAttribute('api-key-name','api_key');\n    docEl.setAttribute('api-key-location','header');\n    docEl.setAttribute('api-key-value',keyInputEl.value);\n  }\n</script>\n</head>\n<body>\n\n<rapi-doc\n  spec-url=\"http://127.0.0.1:5656/openapi.yaml\"\n  primary-color = \"#008661\"\n  nav-bg-color = \"#eeeeee\"\n  nav-text-color = \"#343536\"\n  nav-hover-text-color = \"#008661\"\n  theme = 'light'\n  regular-font = \"Nunito\"\n>\n  <!--\n    below html is custom html that adds an input field and a button in header\n    on clicking the button the 'api-key-value' is set to the value in input box\n  -->\n  <div slot='header' style='display:flex; margin:0 16px;'>\n    <input class='txt' id='key' type='text' >\n    <button class='btn' onclick='setApiKey()' > Login </button >\n  </div>\n</rapi-doc>\n\n</body>\n</html>\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "text/html"
+            }
+          ],
+          "filePath": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false
+        }
+      ],
+      "enabled": true,
+      "randomResponse": false,
+      "sequentialResponse": false
+    },
+    {
+      "uuid": "76dd1570-c51e-4c65-aa73-da9f02ab7097",
+      "documentation": "Show OpenAPI Specification Document",
+      "method": "get",
+      "endpoint": "openapi.yaml",
+      "responses": [
+        {
+          "uuid": "18425bf7-8279-4aa0-8327-d1d01b1f6897",
+          "body": "",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "content-type",
+              "value": "text/yaml"
+            }
+          ],
+          "filePath": "/Users/voiselle/github/hashicorp/nomad-openapi/v1/openapi.yaml",
+          "sendFileAsBody": true,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": true
+        }
+      ],
+      "enabled": true,
+      "randomResponse": false,
+      "sequentialResponse": false
+    },
+    {
+      "uuid": "5e296287-f88f-475d-a8a7-5322526eb6e9",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "",
+      "responses": [
+        {
+          "uuid": "3a297ad5-8075-47a6-9602-659c45b7ff16",
+          "body": "<html><H1>Welcome to the Specfirst OpenAPI Playground</h1>\n\nYou can access several different services:\n\n<ul>\n  <li><a href=/ui>Nomad UI passed through the Mockoom Proxy.</a><br /> This is bext experienced with a build of nomad that contains the mock smart variables configuration.</li>\n  <li><a href=/openapi.yaml>The OpenAPI spec doc.</a><br /> Useful for testing viewers.</li>\n  <li><a href=\"/openapi\"> The Rapidoc Web Frontend for the API</a></li>\n  <li><a href=\"http://127.0.0.1:5656\">Direct to Nomad</a></li>\n</ul>\n</html>",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "text/html"
+            }
+          ],
+          "filePath": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false
+        }
+      ],
+      "enabled": true,
+      "randomResponse": false,
+      "sequentialResponse": false
+    }
+  ],
+  "proxyMode": true,
+  "proxyHost": "http://localhost:4646",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "Origin",
+      "value": "http://localhost:4646"
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ]
+}

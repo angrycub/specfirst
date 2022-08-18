@@ -1,0 +1,439 @@
+openapi: 3.0.3
+info:
+    title: Nomad Secure Variables
+    version: 1.4.0
+    description: Partial API specification for Nomad's secure variables feature
+    contact:
+        name: Nomad Engineering
+        url: 'https://nomadproject.io'
+        email: support@hashicorp.com
+    license:
+        name: Mozilla 2.0
+        url: 'https://www.mozilla.org/en-US/MPL/2.0/'
+servers:
+    -
+        url: '{scheme}://{address}:{port}/v1'
+        description: Nomad Server
+        variables:
+            address:
+                default: 127.0.0.1
+            port:
+                default: '4646'
+            scheme:
+                enum:
+                    - http
+                    - https
+                default: http
+paths:
+    /vars:
+        get:
+            tags:
+                - Variable Operations
+            parameters:
+                -
+                    $ref: '#/components/parameters/RegionParam'
+                -
+                    $ref: '#/components/parameters/NamespaceParam'
+                -
+                    $ref: '#/components/parameters/IndexParam'
+                -
+                    $ref: '#/components/parameters/WaitParam'
+                -
+                    $ref: '#/components/parameters/StaleParam'
+                -
+                    $ref: '#/components/parameters/PrefixParam'
+                -
+                    $ref: '#/components/parameters/PerPageParam'
+                -
+                    $ref: '#/components/parameters/NextTokenParam'
+            responses:
+                '200':
+                    $ref: '#/components/responses/GetSecureVariablesListResponse'
+                '403':
+                    $ref: '#/components/responses/ForbiddenResponse'
+                '500':
+                    $ref: '#/components/responses/InternalServerErrorResponse'
+            security:
+                -
+                    X-Nomad-Token: []
+            operationId: ListVars
+            summary: List the variable bags
+    '/var/{pathToVariable}':
+        get:
+            tags:
+                - Variable Operations
+            parameters:
+                -
+                    $ref: '#/components/parameters/PathParam'
+            responses:
+                '200':
+                    $ref: '#/components/responses/GetVariableResponse'
+                '403':
+                    $ref: '#/components/responses/ForbiddenResponse'
+                '404':
+                    $ref: '#/components/responses/VariableNotFoundResponse'
+                '500':
+                    $ref: '#/components/responses/InternalServerErrorResponse'
+            security:
+                -
+                    X-Nomad-Token: []
+            operationId: GetSecureVariable
+            summary: Fetch a secure variables bag
+        put:
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SecureVariable'
+                        examples:
+                            New Secure Variable:
+                                value:
+                                    Items:
+                                        some_secret_key1: some secret value 1
+                                        some_secret_key2: some secret value 2
+                required: true
+            tags:
+                - Variable Operations
+            parameters:
+                -
+                    $ref: '#/components/parameters/PathParam'
+                -
+                    $ref: '#/components/parameters/RegionParam'
+                -
+                    $ref: '#/components/parameters/NamespaceParam'
+            responses:
+                '200':
+                    $ref: '#/components/responses/CreateVariableResponse'
+                '400':
+                    $ref: '#/components/responses/BadRequestResponse'
+                '403':
+                    $ref: '#/components/responses/ForbiddenResponse'
+                '500':
+                    $ref: '#/components/responses/InternalServerErrorResponse'
+            security:
+                -
+                    X-Nomad-Token: []
+            operationId: UpsertSecureVariable
+            summary: Store a secure variable bag
+        delete:
+            tags:
+                - Variable Operations
+            parameters:
+                -
+                    $ref: '#/components/parameters/PathParam'
+                -
+                    $ref: '#/components/parameters/RegionParam'
+                -
+                    $ref: '#/components/parameters/NamespaceParam'
+            responses:
+                '200':
+                    $ref: '#/components/responses/DeleteVariableResponse'
+                '400':
+                    $ref: '#/components/responses/BadRequestResponse'
+                '403':
+                    $ref: '#/components/responses/ForbiddenResponse'
+                '500':
+                    $ref: '#/components/responses/InternalServerErrorResponse'
+            security:
+                -
+                    X-Nomad-Token: []
+            operationId: DeleteSecureVariable
+            summary: Delete a secure variable bag
+components:
+    schemas:
+        RaftIndex:
+            format: int64
+            type: integer
+            readOnly: true
+        Duration:
+            format: int64
+            type: integer
+        Timestamp:
+            format: date-time
+            type: string
+            readOnly: true
+        SecureVariableStub:
+            description: |+
+                A `SecureVariableStub` object contains:
+                - create and modify index and timestamp
+
+            type: object
+            properties:
+                Namespace:
+                    description: Nomad namespace containing the variable.
+                    default: default
+                    type: string
+                Path:
+                    description: The path at which the variable is stored.
+                    type: string
+                    example: path/to/bag
+                CreateIndex:
+                    $ref: '#/components/schemas/RaftIndex'
+                    description: Server index at which the object was created.
+                CreateTime:
+                    $ref: '#/components/schemas/Timestamp'
+                    description: |-
+                        Date and time at which the object was created. This is stored as a convenience
+                        for the operator.
+                ModifyIndex:
+                    $ref: '#/components/schemas/RaftIndex'
+                    description: |-
+                        Server index at which the object was last modified. If the object has never
+                        been modified, `ModifyIndex` will equal `CreateIndex`.
+                ModifyTime:
+                    $ref: '#/components/schemas/Timestamp'
+                    description: |-
+                        Server date and time at which the object was last modified. If the object has
+                        never been modified, `ModifyTime` will equal `CreateTime`.This is stored as a
+                        convenience for the operator.
+            readOnly: true
+            example:
+                Namespace: default
+                Path: path/to/var
+                CreateIndex: 98
+                CreateTime: '2018-02-10T09:30Z'
+                ModifyIndex: 100
+                ModifyTime: '2018-02-11T09:30Z'
+        SecureVariable:
+            description: |
+                A `SecureVariable` object contains an `Items` collection, which is encrypted at
+                rest in the Servers' data files. It also contains a `UserMeta` collection, which
+                is stored in the clear and available to operators with the `list` permission.
+            type: object
+            properties:
+                Namespace:
+                    description: Nomad namespace containing the variable.
+                    default: default
+                    type: string
+                Path:
+                    description: The path at which the variable is stored.
+                    type: string
+                    example: path/to/bag
+                CreateIndex:
+                    $ref: '#/components/schemas/RaftIndex'
+                    description: Server index at which the object was created.
+                CreateTime:
+                    $ref: '#/components/schemas/Timestamp'
+                    description: |-
+                        Date and time at which the object was created. This is stored as a convenience
+                        for the operator.
+                ModifyIndex:
+                    $ref: '#/components/schemas/RaftIndex'
+                    description: |-
+                        Server index at which the object was last modified. If the object has never
+                        been modified, `ModifyIndex` will equal `CreateIndex`.
+                ModifyTime:
+                    $ref: '#/components/schemas/Timestamp'
+                    description: |-
+                        Server date and time at which the object was last modified. If the object has
+                        never been modified, `ModifyTime` will equal `CreateTime`.This is stored as a
+                        convenience for the operator.
+                Items:
+                    description: |-
+                        Collection of key/value pairs to be encrypted at rest.  
+                        These values can only be
+                        retrieved by direct fetch of the variable from its path.
+                    type: object
+                    additionalProperties:
+                        uniqueItems: true
+                        type: string
+                    example:
+                        db_password: secret
+                        admin_password: supersecret
+                        user_password: abcd123
+            example:
+                Namespace: default
+                Path: path/to/var
+                CreateIndex: 98
+                CreateTime: '2018-02-10T09:30Z'
+                ModifyIndex: 100
+                ModifyTime: '2018-02-11T09:30Z'
+                Items:
+                    secureKey1: secure value 1
+                    anothersecurekey: passw0rd
+    responses:
+        BadRequestResponse:
+            description: Bad request
+        ForbiddenResponse:
+            description: Forbidden
+        GetVariableResponse:
+            headers:
+                X-Nomad-Index:
+                    $ref: '#/components/headers/X-Nomad-Index'
+                X-Nomad-KnownLeader:
+                    $ref: '#/components/headers/X-Nomad-KnownLeader'
+                X-Nomad-LastContact:
+                    $ref: '#/components/headers/X-Nomad-LastContact'
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/SecureVariable'
+            description: |-
+                A secure variable bag object. Key-value pairs in the `Items` map are stored
+                in an encrypted format. Key-value pairs in the `Meta` map are stored in the
+                clear and can be used to provide additional information about the secrets
+                stored in the bag, for example: maintainer contact information.
+        InternalServerErrorResponse:
+            content:
+                text/plain:
+                    schema:
+                        type: string
+                    examples:
+                        unexpected EOF Error:
+                            value: unexpected EOF
+            description: Internal server error
+        MethodNotAllowedResponse:
+            description: Method not allowed
+        PostVariableResponse:
+            headers:
+                X-Nomad-Index:
+                    $ref: '#/components/headers/X-Nomad-Index'
+            description: ''
+        CreateVariableResponse:
+            headers:
+                X-Nomad-Index:
+                    $ref: '#/components/headers/X-Nomad-Index'
+            description: |
+                The response body will be empty when the variable creation succeeds. The
+                `X-Nomad-Index` header will contain the index at which the variable bag was
+                written to the server state.
+        DeleteVariableResponse:
+            headers:
+                X-Nomad-Index:
+                    $ref: '#/components/headers/X-Nomad-Index'
+            description: |
+                The response body will be empty for a successful operation. Deleting a
+                variable bag that does not exist will always succeeed. The `X-Nomad-Index`
+                header will contain the index at which the variable bag was written to the
+                server state.
+        GetSecureVariablesListResponse:
+            headers:
+                X-Nomad-Index:
+                    $ref: '#/components/headers/X-Nomad-Index'
+                X-Nomad-KnownLeader:
+                    $ref: '#/components/headers/X-Nomad-KnownLeader'
+                X-Nomad-LastContact:
+                    $ref: '#/components/headers/X-Nomad-LastContact'
+            content:
+                application/json:
+                    schema:
+                        type: array
+                        items:
+                            $ref: '#/components/schemas/SecureVariableStub'
+            description: A list of `SecureVariableStub` objects.
+        VariableNotFoundResponse:
+            content:
+                text/plain:
+                    schema:
+                        type: string
+            description: Secure variable not found response.
+        EmptyBodyResponse:
+            description: Empty Body Response.
+    parameters:
+        AllParam:
+            name: all
+            description: Flag indicating whether to constrain by create index or not.
+            schema:
+                type: integer
+            in: query
+        IndexParam:
+            name: index
+            description: 'If set, wait until query exceeds given index. Must be provided with WaitParam.'
+            schema:
+                type: integer
+            in: query
+        PathParam:
+            example: path/to/var
+            name: pathToVariable
+            description: 'Slash-delimited path to the read, store, or delete a variable'
+            schema:
+                type: string
+            in: path
+            required: true
+        NamespaceParam:
+            name: namespace
+            description: Filters results based on the specified namespace.
+            schema:
+                type: string
+            in: query
+        NextTokenParam:
+            name: next_token
+            description: Indicates where to start paging for queries that support pagination.
+            schema:
+                type: string
+            in: query
+        NomadTokenHeader:
+            name: X-Nomad-Token
+            description: A Nomad ACL token.
+            schema:
+                type: string
+            in: header
+        PerPageParam:
+            name: per_page
+            description: Maximum number of results to return.
+            schema:
+                type: integer
+            in: query
+        PrefixParam:
+            name: prefix
+            description: Constrains results to jobs that start with the defined prefix
+            schema:
+                type: string
+            in: query
+        RegionParam:
+            name: region
+            description: Filters results based on the specified region.
+            schema:
+                type: string
+            in: query
+        StaleParam:
+            name: stale
+            description: 'If present, results will include stale reads.'
+            schema:
+                type: string
+            in: query
+        WaitParam:
+            name: wait
+            description: Provided with IndexParam to wait for change.
+            schema:
+                type: string
+            in: query
+    requestBodies:
+        SecureVariable:
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/SecureVariable'
+            required: true
+    headers:
+        X-Nomad-Index:
+            schema:
+                type: integer
+            description: >-
+                A unique identifier representing the current state of the requested resource. On a new Nomad
+                cluster the value of this index starts at 1.
+        X-Nomad-LastContact:
+            schema:
+                $ref: '#/components/schemas/Duration'
+            description: The time in milliseconds that a server was last contacted by the leader node.
+        X-Nomad-KnownLeader:
+            schema:
+                type: boolean
+            description: Boolean indicating if there is a known cluster leader.
+    securitySchemes:
+        X-Nomad-Token:
+            type: apiKey
+            name: X-Nomad-Token
+            in: header
+security:
+    -
+        X-Nomad-Token: []
+tags:
+    -
+        name: Variable Operations
+        description: >-
+            API Endpoints for users to create, read, update, and delete variable bags from the Nomad secure
+            variables subsystem.
+    -
+        name: Secure Variables Configuration
+        description: API Endpoints used to configure the Nomad secure variables subsystem
